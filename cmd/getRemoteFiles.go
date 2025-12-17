@@ -19,6 +19,8 @@ var getRemoteFilesCmd = &cobra.Command{
 		src.setTargetArchiveFullName()
 
 		managerRemoteStorage(src, cmd.Use)
+
+		logrus.Info("Done")
 	},
 }
 
@@ -28,7 +30,9 @@ func getFilesFromRemoteStorage(rs RemoteStorage) error {
 		return err
 	}
 
-	fmt.Println(fl)
+	for _, f := range fl {
+		fmt.Println("/"+rs.GetRootDir()+"/"+f.Name(), ":", f.Size())
+	}
 
 	return nil
 }

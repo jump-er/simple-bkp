@@ -75,6 +75,17 @@ func (w *Wd) GetListFiles() ([]os.FileInfo, error) {
 	return l, nil
 }
 
+func (w *Wd) Remove(f string) error {
+	if err := w.Client.Remove(f); err != nil {
+		return nil
+	}
+	return nil
+}
+
+func (w *Wd) GetRootDir() string {
+	return w.RootDir
+}
+
 func NewWd() *Wd {
 	return &Wd{
 		url:            os.Getenv("WEB_DAV_URL"),

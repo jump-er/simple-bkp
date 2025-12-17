@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"archive/zip"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -19,8 +21,8 @@ type src struct {
 }
 
 func (s *src) zipFiles() error {
-	arhiveFileName := s.targetArchiveFullName
-	zipFile, err := os.Create(arhiveFileName)
+	a := s.targetArchivePath + "/" + s.targetArchiveFullName
+	zipFile, err := os.Create(a)
 	if err != nil {
 		return err
 	}
@@ -84,6 +86,43 @@ func (s *src) handleLocalArchive() error {
 			return err
 		}
 		logrus.Warnf("Archive %s is removed", s.targetArchivePath+"/"+s.targetArchiveFullName)
+	}
+
+	return nil
+}
+
+func (s *src) cleanUpArchivesLocal(days string) error {
+	d, err := strconv.Atoi(days)
+	if err != nil {
+		return err
+	}
+
+	localFiles, err := os.ReadDir(s.targetArchivePath)
+	if err != nil {
+		return err
+	}
+
+	for _, f := range localFiles {
+		path := s.targetArchivePath + "/" + f.Name()
+
+		i, err := os.Stat(path)
+		if err != nil {
+			return err
+		}
+
+		modTime := i.ModTime()
+		if time.Since(modTime) > (time.Duration(d) * 24 * time.Hour) {
+			if err := os.Remove(path); err != nil {
+				return fmt.Errorf("remove old file: %w", err)
+			}
+			logrus.Infof("Removed old local file: %s (age %v days)", path, int(time.Since(modTime).Hours()/24))
+		} else {
+			logrus.Infof("File is recent: %s", path)
+		}
+	}
+
+	if (len(localFiles) - 1) > d {
+		logrus.Warn("More files than you need")
 	}
 
 	return nil

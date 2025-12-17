@@ -20,6 +20,13 @@ var makeBkpCmd = &cobra.Command{
 		if err := src.handleLocalArchive(); err != nil {
 			logrus.Errorf("Removing archive %s error: %s", src.targetArchiveFullName, err)
 		}
+
+		logrus.Infof("Cleanup local...")
+		if err := src.cleanUpArchivesLocal(archiveStorageDepth); err != nil {
+			logrus.Errorf("Cleanup archives local error: %s", err)
+		}
+
+		logrus.Info("Done")
 	},
 }
 

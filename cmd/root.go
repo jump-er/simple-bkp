@@ -17,6 +17,7 @@ var (
 	targetArchiveNamePrefix  = ""
 	remoteStorageType        = ""
 	shouldRemoveLocalArchive = false
+	archiveStorageDepth      = ""
 )
 
 func Execute() {
@@ -29,7 +30,7 @@ func Execute() {
 func init() {
 	rootCmd.AddCommand(makeBkpCmd)
 	makeBkpCmd.Flags().StringVar(
-		&srcDir, "src-dir", "", "Указывает путь к локальному каталогу, для которой будет осуществляться резервное копирование.")
+		&srcDir, "src-dir", "", "Указывает путь к локальному каталогу, для которого будет осуществляться резервное копирование.")
 	makeBkpCmd.Flags().StringVar(
 		&targetArchiveLocalPath, "target-archive-local-path", "", "Указывает путь к локальному каталогу для архива.")
 	makeBkpCmd.Flags().StringVar(
@@ -38,8 +39,12 @@ func init() {
 		&remoteStorageType, "remote-storage-type", "", "Указывает тип удаленного хранилища резервных копий (WebDav, s3, SMB...)")
 	makeBkpCmd.Flags().BoolVar(
 		&shouldRemoveLocalArchive, "remove-local-archive", false, "Указывает на необходимость удаления локальной копии архива.")
+	makeBkpCmd.Flags().StringVar(
+		&archiveStorageDepth, "archive-storage-depth", "3", "Глубина хранения резервных копий как локально, так и удаленно в днях.")
 
 	rootCmd.AddCommand(getRemoteFilesCmd)
 	getRemoteFilesCmd.Flags().StringVar(
 		&remoteStorageType, "remote-storage-type", "", "Указывает тип удаленного хранилища резервных копий (WebDav, s3, SMB...)")
+
+	rootCmd.AddCommand(versionCmd)
 }
