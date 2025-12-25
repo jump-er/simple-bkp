@@ -24,12 +24,8 @@ func selectRemoteStorage(src *src) (RemoteStorage, error) {
 	switch remoteStorageType {
 	case "webdav":
 		rs := storage.NewWd()
-		err := rs.ClientInit()
-		if err != nil {
-			logrus.Warnf("WebDav auth error %s", err)
-		}
 		rs.LocalFilePath = src.targetArchivePath + "/" + src.targetArchiveFullName
-		rs.WebdavFilePath = rs.RootDir + "/" + src.targetArchiveFullName
+		rs.WebdavFilePath = rs.GetRootDir() + "/" + src.targetArchiveFullName
 
 		return rs, nil
 
@@ -59,7 +55,7 @@ func managerRemoteStorage(src *src, cmd string) {
 	switch cmd {
 	case "makebkp":
 		if err := runBackupProcessToRemoteStorage(remoteStorage); err != nil {
-			logrus.Errorf("Run backup process to remote storage error: %s", err)
+			logrus.Fatalf("Run backup process to remote storage error: %s", err)
 		}
 		logrus.Info("Cleanup remote...")
 		if err = cleanUpArchivesRemote(remoteStorage, archiveStorageDepth); err != nil {
@@ -89,9 +85,9 @@ func cleanUpArchivesRemote(rs RemoteStorage, days string) error {
 			if err := rs.Remove(rs.GetRootDir() + "/" + f.Name()); err != nil {
 				return fmt.Errorf("remove old remote file error: %w", err)
 			}
-			logrus.Infof("Removed old remote file: %s (age %v days)", "/"+rs.GetRootDir()+"/"+f.Name(), int(time.Since(modTime).Hours()/24))
+			logrus.Infof("Removed old remote file: %s (age %v days)", rs.GetRootDir()+"/"+f.Name(), int(time.Since(modTime).Hours()/24))
 		} else {
-			logrus.Infof("Remote file is recent: %s", "/"+rs.GetRootDir()+"/"+f.Name())
+			logrus.Infof("Remote file is recent: %s", rs.GetRootDir()+"/"+f.Name())
 		}
 	}
 
